@@ -1,0 +1,121 @@
+/* src/index.css — Global styles + Tailwind directives */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base ──────────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body, #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background-color: #0f0f13;
+    color: #e2e8f0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #16161d;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3d3d55;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #6366f1;
+  }
+}
+
+/* ─── Components ─────────────────────────────────────────────────────────── */
+@layer components {
+  /* Glass card */
+  .glass {
+    @apply bg-surface-2 backdrop-blur-md border border-white/5 rounded-xl;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  .glass-hover {
+    @apply glass transition-all duration-200 hover:border-brand-500/30 hover:shadow-brand-sm;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm
+           bg-gradient-to-r from-brand-500 to-accent
+           text-white shadow-brand-sm
+           transition-all duration-200
+           hover:shadow-brand-md hover:scale-[1.02]
+           active:scale-[0.98]
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
+           bg-surface-3 border border-white/10 text-slate-300
+           transition-all duration-200
+           hover:bg-surface-4 hover:border-brand-500/40 hover:text-white
+           active:scale-[0.98]
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* Icon button */
+  .btn-icon {
+    @apply p-2 rounded-lg text-slate-400 transition-all duration-200
+           hover:bg-surface-3 hover:text-white
+           active:scale-[0.9];
+  }
+
+  /* Input */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-lg text-sm
+           bg-surface-3 border border-white/10 text-white
+           placeholder:text-slate-500
+           outline-none ring-0
+           transition-all duration-200
+           focus:border-brand-500/60 focus:ring-1 focus:ring-brand-500/30;
+  }
+
+  /* Status badge base */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-400 to-accent-light bg-clip-text text-transparent;
+  }
+}
+
+/* ─── Utilities ──────────────────────────────────────────────────────────── */
+@layer utilities {
+  .no-drag   { -webkit-app-region: no-drag; }
+  .drag-area { -webkit-app-region: drag; }
+
+  /* Shimmer animation for skeleton loading */
+  .shimmer {
+    background: linear-gradient(90deg,
+      rgba(255,255,255,0.03) 25%,
+      rgba(255,255,255,0.08) 50%,
+      rgba(255,255,255,0.03) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}

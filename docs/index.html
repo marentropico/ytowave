@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YtoWave - Downloader de Músicas de Alta Fidelidade (YouTube e Spotify)</title>
+  <meta name="description" content="Guia de instalação oficial e página de download do YtoWave. Baixe playlists e faixas do Spotify ou YouTube em WAV, FLAC ou MP3 com metadados e capas completas.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Design System Tokens */
+    :root {
+      --bg: #060913;
+      --bg-surface: rgba(13, 17, 30, 0.7);
+      --bg-card: rgba(22, 28, 48, 0.4);
+      --border-color: rgba(255, 255, 255, 0.06);
+      
+      --brand: #6366f1;
+      --brand-hover: #4f46e5;
+      --brand-glow: rgba(99, 102, 241, 0.15);
+      
+      --accent: #a78bfa;
+      --accent-glow: rgba(167, 139, 250, 0.15);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dark: #64748b;
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient background glows */
+    .glow-container {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      z-index: -1;
+      pointer-events: none;
+    }
+    .glow-1 {
+      position: absolute;
+      top: -200px;
+      left: 20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--brand-glow) 0%, rgba(99, 102, 241, 0) 70%);
+      filter: blur(80px);
+    }
+    .glow-2 {
+      position: absolute;
+      top: 150px;
+      right: 15%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, rgba(167, 139, 250, 0) 70%);
+      filter: blur(80px);
+    }
+
+    /* Layout Components */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header Nav */
+    header {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(6, 9, 19, 0.6);
+    }
+    .nav-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 72px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    .logo-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: white;
+      stroke-width: 2.5;
+    }
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+    .logo-text span {
+      background: linear-gradient(to right, var(--brand), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .github-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .github-link:hover {
+      color: white;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 80px 0 60px 0;
+      text-align: center;
+      position: relative;
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 100px;
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    h1 {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -2px;
+      max-width: 800px;
+      margin: 0 auto 20px auto;
+      color: white;
+    }
+    h1 span {
+      background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 36px auto;
+    }
+
+    .cta-group {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand) 0%, #7c3aed 100%);
+      color: white;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.45);
+      background: linear-gradient(135deg, var(--brand-hover) 0%, #6d28d9 100%);
+    }
+    .btn-secondary {
+      background: rgba(22, 28, 48, 0.6);
+      border: 1px solid var(--border-color);
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: rgba(30, 41, 73, 0.7);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    /* CSS Interactive Mockup */
+    .mockup-container {
+      max-width: 780px;
+      margin: 60px auto 0 auto;
+      background: #0d1222;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 100px rgba(99,102,241,0.08);
+      overflow: hidden;
+      position: relative;
+    }
+    .mockup-header {
+      background: #090c17;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mockup-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .mockup-dot.red { background: #ef4444; }
+    .mockup-dot.yellow { background: #f59e0b; }
+    .mockup-dot.green { background: #10b981; }
+    .mockup-title {
+      color: var(--text-dark);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .mockup-body {
+      display: flex;
+      height: 380px;
+    }
+    .mockup-sidebar {
+      width: 160px;
+      background: #090c16;
+      border-right: 1px solid rgba(255,255,255,0.05);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .mockup-menu-item {
+      height: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+      width: 100%;
+    }
+    .mockup-menu-item.active {
+      background: rgba(99,102,241,0.2);
+      border-left: 2px solid var(--brand);
+    }
+    .mockup-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .mockup-input-bar {
+      height: 38px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 10px;
+    }
+    .mockup-input-text {
+      width: 60%;
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+    }
+    .mockup-input-btn {
+      width: 60px;
+      height: 20px;
+      background: var(--brand);
+      border-radius: 4px;
+      margin-left: auto;
+    }
+
+    /* Queue Items in Mockup */
+    .mockup-queue {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .mockup-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .mockup-img {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--accent) 100%);
+      border-radius: 6px;
+    }
+    .mockup-item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .mockup-item-title {
+      width: 120px;
+      height: 8px;
+      background: white;
+      border-radius: 2px;
+    }
+    .mockup-item-artist {
+      width: 70px;
+      height: 6px;
+      background: var(--text-dark);
+      border-radius: 2px;
+    }
+    .mockup-progress {
+      width: 140px;
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .mockup-progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: linear-gradient(to right, var(--brand), var(--accent));
+      border-radius: 3px;
+    }
+
+    .mockup-badge {
+      padding: 4px 8px;
+      border-radius: 100px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .mockup-badge.error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+    .mockup-badge.done {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+
+    /* Features Grid */
+    .features {
+      padding: 100px 0;
+      background: radial-gradient(100% 50% at 50% 50%, rgba(13,18,34,0.3) 0%, rgba(6,9,19,0) 100%);
+    }
+    .section-title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 48px;
+    }
+    .section-title span {
+      background: linear-gradient(to right, var(--brand), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .feature-card:hover {
+      border-color: rgba(99, 102, 241, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    }
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand);
+    }
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+    }
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Installation Steps */
+    .installation {
+      padding: 60px 0 100px 0;
+    }
+    .steps-container {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .step-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 40px;
+      position: relative;
+    }
+    .step-num {
+      position: absolute;
+      top: -16px;
+      left: 40px;
+      width: 32px;
+      height: 32px;
+      background: var(--brand);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
+    }
+    .step-card h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: white;
+    }
+    .step-card p {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    /* Code blocks style */
+    .code-block {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 18px 24px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #34d399;
+      position: relative;
+      overflow-x: auto;
+    }
+    .code-comment {
+      color: #64748b;
+    }
+    
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 40px 0;
+      text-align: center;
+      background: #04060c;
+    }
+    .footer-text {
+      color: var(--text-dark);
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    /* Animations */
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-up {
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      h1 { font-size: 38px; letter-spacing: -1px; }
+      .hero { padding: 40px 0; }
+      .step-card { padding: 24px; }
+      .step-num { left: 24px; }
+      .mockup-sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Ambient Glows -->
+  <div class="glow-container">
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header>
+    <div class="container nav-wrapper">
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+          </svg>
+        </div>
+        <div class="logo-text">Yto<span>Wave</span></div>
+      </a>
+      <a href="https://github.com" id="nav-github-btn" class="github-link" target="_blank" rel="noopener">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.137 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+        </svg>
+        GitHub
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="container">
+    <section class="hero animate-slide-up">
+      <div class="badge">
+        <span>✨</span> Versão 1.0.0 (Windows)
+      </div>
+      <h1>Sua biblioteca de música em <span>Alta Fidelidade</span>.</h1>
+      <p class="hero-subtitle">
+        Baixe faixas e playlists completas do Spotify ou do YouTube diretamente para seu computador nos formatos WAV, FLAC ou MP3 com metadados e capas automáticas.
+      </p>
+      
+      <div class="cta-group">
+        <!-- Substitua o href pelo link de sua release do github após fazer o upload -->
+        <a href="https://github.com" id="download-installer-btn" class="btn btn-primary">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="flex-shrink:0;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          Baixar Instalador (Setup.exe)
+        </a>
+        <a href="#install-guide" id="view-docs-btn" class="btn btn-secondary">
+          Guia de Instalação
+        </a>
+      </div>
+
+      <!-- CSS-Based Interactive App Mockup -->
+      <div class="mockup-container">
+        <div class="mockup-header">
+          <div class="mockup-dot red"></div>
+          <div class="mockup-dot yellow"></div>
+          <div class="mockup-dot green"></div>
+          <div class="mockup-title">YtoWave v1.0.0 - Windows Application</div>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-sidebar">
+            <div class="mockup-menu-item active"></div>
+            <div class="mockup-menu-item"></div>
+            <div class="mockup-menu-item" style="width: 75%;"></div>
+            <div class="mockup-menu-item" style="width: 50%; margin-top: auto;"></div>
+          </div>
+          <div class="mockup-content">
+            <div class="mockup-input-bar">
+              <div class="mockup-input-text"></div>
+              <div class="mockup-input-btn"></div>
+            </div>
+            
+            <div class="mockup-queue">
+              <!-- Item 1 (Done) -->
+              <div class="mockup-item">
+                <div class="mockup-img" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%)"></div>
+                <div class="mockup-item-info">
+                  <div class="mockup-item-title"></div>
+                  <div class="mockup-item-artist"></div>
+                </div>
+                <div class="mockup-progress"><div class="mockup-progress-fill" style="width: 100%; background: #10b981;"></div></div>
+                <span class="mockup-badge done">Salvo</span>
+              </div>
+              
+              <!-- Item 2 (Active/Downloading) -->
+              <div class="mockup-item">
+                <div class="mockup-img" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"></div>
+                <div class="mockup-item-info">
+                  <div class="mockup-item-title" style="width: 150px;"></div>
+                  <div class="mockup-item-artist" style="width: 90px;"></div>
+                </div>
+                <div class="mockup-progress"><div class="mockup-progress-fill" style="width: 65%;"></div></div>
+                <span class="mockup-badge" style="background: rgba(99,102,241,0.15); color: #818cf8;">65%</span>
+              </div>
+              
+              <!-- Item 3 (Failed / Link Pool) -->
+              <div class="mockup-item" style="border-color: rgba(239,68,68,0.2);">
+                <div class="mockup-img" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)"></div>
+                <div class="mockup-item-info">
+                  <div class="mockup-item-title" style="width: 110px;"></div>
+                  <div class="mockup-item-artist" style="width: 50px;"></div>
+                </div>
+                <div class="mockup-progress"><div class="mockup-progress-fill" style="width: 0%;"></div></div>
+                <span class="mockup-badge error">Erro</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <h2 class="section-title">Por que usar o <span>YtoWave</span>?</h2>
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+            </svg>
+          </div>
+          <h3>Qualidade de Estúdio</h3>
+          <p>Extraia áudios em WAV de 24-bit ou 16-bit com integridade absoluta, FLAC lossless ou MP3 em 320kbps de alta qualidade.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+            </svg>
+          </div>
+          <h3>Pool de Links Alternativos</h3>
+          <p>Ocorreu algum erro ao baixar do Spotify? Cole links alternativos do YouTube no "Pool de Links" da faixa para contornar restrições, mantendo as tags do Spotify intactas!</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3>Metadados & Capas Reais</h3>
+          <p>O app injeta tags de Artista, Álbum, Título e adiciona a imagem de capa (Thumbnail) oficial diretamente no arquivo final baixado.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Installation Instructions -->
+    <section class="installation" id="install-guide">
+      <h2 class="section-title">Instalação em <span>1 Clique</span></h2>
+      <div class="steps-container">
+        
+        <!-- Step 1 (Download) -->
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Baixe e Execute o Instalador</h3>
+          <p>
+            Clique no botão <strong>"Baixar Instalador"</strong> no topo da página para fazer o download do arquivo <code>YtoWave Setup 1.0.0.exe</code>. Dê um duplo clique nele. A instalação é 100% automática: o app cria os atalhos na sua Área de Trabalho e inicializa todas as dependências nativas (FFmpeg e SpotDL) sem precisar configurar nada!
+          </p>
+        </div>
+
+        <!-- Step 2 (SmartScreen) -->
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Aviso do Windows (SmartScreen)</h3>
+          <p>
+            Como o aplicativo é novo e de código aberto, o Windows Defender SmartScreen pode exibir um aviso azul de "Aplicativo não reconhecido" na primeira execução. Basta clicar em <strong>"Mais informações"</strong> e depois no botão <strong>"Executar assim mesmo"</strong>. O YtoWave é 100% seguro!
+          </p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="logo" style="justify-content: center; margin-bottom: 16px;">
+        <div class="logo-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+          </svg>
+        </div>
+        <div class="logo-text">Yto<span>Wave</span></div>
+      </div>
+      <p class="footer-text">Desenvolvido com carinho para amantes de música. © 2026 YtoWave.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
